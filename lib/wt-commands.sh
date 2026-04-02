@@ -89,9 +89,11 @@ __wt_cmd_rm() {
 }
 
 __wt_print_ls_entry() {
-  local wt_path="$1" head="$2" branch="$3" locked="$4"
+  local wt_path="$1" head="$2" branch="$3" locked="$4" prunable="$5"
   local status_icon lock_icon=""
-  if __wt_is_dirty "$wt_path"; then
+  if [ "$prunable" = 1 ]; then
+    status_icon="${__WT_RED}prunable${__WT_RESET}"
+  elif __wt_is_dirty "$wt_path"; then
     status_icon="${__WT_RED}*${__WT_RESET}"
   else
     status_icon="${__WT_GREEN}ok${__WT_RESET}"
@@ -108,7 +110,7 @@ __wt_print_ls_entry() {
 __wt_cmd_ls() {
   __wt_ensure_git_repo || return 1
 
-  local wt_path="" head="" branch="" locked=0 has_entries=0
+  local wt_path="" head="" branch="" locked=0 prunable=0 has_entries=0
   local tmpfile
   tmpfile="$(mktemp)"
   git worktree list --porcelain 2>/dev/null > "$tmpfile"
@@ -122,12 +124,13 @@ __wt_cmd_ls() {
         ;;
       "branch "*) branch="${line#branch refs/heads/}" ;;
       locked*)    locked=1 ;;
+      prunable*)  prunable=1 ;;
       "")
         if [ -n "$wt_path" ]; then
           has_entries=1
-          __wt_print_ls_entry "$wt_path" "$head" "$branch" "$locked"
+          __wt_print_ls_entry "$wt_path" "$head" "$branch" "$locked" "$prunable"
         fi
-        wt_path=""; head=""; branch=""; locked=0
+        wt_path=""; head=""; branch=""; locked=0; prunable=0
         ;;
     esac
   done < "$tmpfile"
@@ -135,7 +138,7 @@ __wt_cmd_ls() {
   # Handle final entry (porcelain doesn't end with blank line)
   if [ -n "$wt_path" ]; then
     has_entries=1
-    __wt_print_ls_entry "$wt_path" "$head" "$branch" "$locked"
+    __wt_print_ls_entry "$wt_path" "$head" "$branch" "$locked" "$prunable"
   fi
   rm -f "$tmpfile"
 
