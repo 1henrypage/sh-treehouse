@@ -94,3 +94,20 @@ test_ls_shows_locked_indicator() {
 }
 
 it "shows locked indicator" test_ls_shows_locked_indicator
+
+# ── Prunable Indicator ────────────────────────────────────────────────
+
+test_ls_shows_prunable_indicator() {
+  cd "$TEST_REPO"
+  __fixture_create_branch "prunable-wt"
+  wt add prunable-wt >/dev/null 2>&1
+  local wt_path="$WT_DIR/origin/prunable-wt"
+  # wt add cd's into the new worktree; return to main repo before deleting it
+  cd "$TEST_REPO"
+  # Simulate a missing worktree directory (e.g. deleted outside of git)
+  rm -rf "$wt_path"
+  __capture wt ls
+  assert_match "$__STDOUT" "prunable-wt.*prunable" "shows prunable indicator for missing worktree"
+}
+
+it "shows prunable indicator for missing worktree directory" test_ls_shows_prunable_indicator
