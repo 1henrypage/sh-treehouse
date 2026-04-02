@@ -2,7 +2,7 @@
 
 # ── Color Constants ───────────────────────────────────────────────────
 # Respect NO_COLOR convention (https://no-color.org) and non-terminal output
-if [ -n "${NO_COLOR:-}" ] || [ ! -t 1 ]; then
+if [ -n "${NO_COLOR:-}" ] || { [ -z "${__WT_COLOR:-}" ] && [ ! -t 1 ]; }; then
   __WT_RED=""
   __WT_GREEN=""
   __WT_YELLOW=""
