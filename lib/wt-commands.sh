@@ -69,8 +69,8 @@ __wt_cmd_rm() {
   if [ "$yes" = 1 ]; then
     reply="y"
   else
-    printf "Also delete branch '%s'? [y/N] " "$branch"
-    read -r reply
+    printf "Also delete branch '%s'? [y/N] " "$branch" >&2
+    read -r reply </dev/tty
   fi
   case "$reply" in
     [yY])
