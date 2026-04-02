@@ -1,12 +1,10 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 # Tests for wt dispatcher and help
 
 describe "Dispatcher"
 
 setup() {
-  __fixture_unload_plugin
-  source "$PLUGIN_FILE"
   __fixture_create_repo
 }
 
@@ -72,7 +70,6 @@ it "shows error for unknown command" test_unknown_command_shows_error
 test_routes_add_command() {
   cd "$TEST_REPO"
   __capture wt add
-  # Should error with usage, but proves routing worked
   assert_contains "$__STDERR" "usage: wt add" "routes to add command"
 }
 
@@ -89,7 +86,6 @@ it "routes 'rm' command" test_routes_rm_command
 test_routes_ls_command() {
   cd "$TEST_REPO"
   __capture wt ls
-  # ls doesn't require args, so just check it ran
   assert_exit_code 0 "routes to ls command"
 }
 
@@ -105,8 +101,7 @@ it "routes 'checkout' command" test_routes_checkout_command
 
 test_routes_base_command() {
   cd "$TEST_REPO"
-  # base doesn't take args and changes directory, so just call it
-  wt base &>/dev/null
+  wt base >/dev/null 2>&1
   local rc=$?
   assert_eq "$rc" "0" "routes to base command"
 }

@@ -1,0 +1,46 @@
+#!/bin/sh
+# wt — git worktree manager
+# https://github.com/1henrypage/sh-treehouse
+
+# Resolve script directory (POSIX-compatible)
+WT_SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+WT_LIB_DIR="$WT_SCRIPT_DIR/../lib"
+
+# Configuration
+: "${WT_DIR:=$HOME/.treehouse}"
+export WT_DIR
+
+# Source library modules
+. "$WT_LIB_DIR/wt-output.sh"
+. "$WT_LIB_DIR/wt-git.sh"
+. "$WT_LIB_DIR/wt-commands.sh"
+
+# Dispatcher
+subcmd="${1:-help}"
+[ $# -gt 0 ] && shift
+
+case "$subcmd" in
+  init)
+    . "$WT_LIB_DIR/wt-init.sh"
+    __wt_cmd_init "$@"
+    ;;
+  add)       __wt_cmd_add "$@" ;;
+  rm)        __wt_cmd_rm "$@" ;;
+  ls)        __wt_cmd_ls "$@" ;;
+  checkout)  __wt_cmd_checkout "$@" ;;
+  base)      __wt_cmd_base "$@" ;;
+  prune)     __wt_cmd_prune "$@" ;;
+  status)    __wt_cmd_status "$@" ;;
+  lock)      __wt_cmd_lock "$@" ;;
+  unlock)    __wt_cmd_unlock "$@" ;;
+  run)       __wt_cmd_run "$@" ;;
+  reset)     __wt_cmd_reset "$@" ;;
+  integrate) __wt_cmd_integrate "$@" ;;
+  diff)      __wt_cmd_diff "$@" ;;
+  help|-h|--help) __wt_cmd_help ;;
+  *)
+    __wt_err "unknown command: $subcmd"
+    __wt_cmd_help
+    exit 1
+    ;;
+esac

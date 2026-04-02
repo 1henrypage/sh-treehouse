@@ -1,12 +1,10 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 # Tests for wt reset
 
 describe "wt reset"
 
 setup() {
-  __fixture_unload_plugin
-  source "$PLUGIN_FILE"
   __fixture_create_repo
 }
 
@@ -43,19 +41,6 @@ test_reset_outside_repo_shows_error() {
 
 it "shows error outside repository" test_reset_outside_repo_shows_error
 
-# ── Helper assertions ─────────────────────────────────────────────────
-
-assert_file_not_exists() {
-  local file="$1"
-  local msg="${2:-expected file not to exist: $file}"
-
-  if [[ ! -f "$file" ]]; then
-    __test_pass "$msg"
-  else
-    __test_fail "$msg" "file exists but shouldn't: $file"
-  fi
-}
-
 # ── Core Behavior ─────────────────────────────────────────────────────
 
 test_reset_to_default_branch() {
@@ -67,12 +52,13 @@ test_reset_to_default_branch() {
   __fixture_commit_in_worktree "reset-test" "new-file.txt" "Add new file"
 
   # Reset to default branch (main)
-  wt reset reset-test &>/dev/null
+  wt reset reset-test >/dev/null 2>&1
 
   # Check that worktree HEAD matches main
   local wt_path="$WT_DIR/origin/reset-test"
-  local wt_head=$(git -C "$wt_path" rev-parse HEAD)
-  local main_head=$(git -C "$TEST_REPO" rev-parse main)
+  local wt_head main_head
+  wt_head=$(git -C "$wt_path" rev-parse HEAD)
+  main_head=$(git -C "$TEST_REPO" rev-parse main)
 
   assert_eq "$wt_head" "$main_head" "resets worktree to main"
 }
@@ -81,16 +67,15 @@ it "resets worktree to default branch" test_reset_to_default_branch
 
 test_reset_removes_untracked_files() {
   cd "$TEST_REPO"
-  # Create worktree without initial commit
-  wt add reset-clean &>/dev/null
+  wt add reset-clean >/dev/null 2>&1
 
   local wt_path="$WT_DIR/origin/reset-clean"
 
-  # Add untracked file (not in git)
-  print "untracked" > "$wt_path/untracked.txt"
+  # Add untracked file
+  printf 'untracked\n' > "$wt_path/untracked.txt"
 
   # Reset should remove it with git clean (needs -f because worktree is dirty)
-  wt reset -f reset-clean &>/dev/null
+  wt reset -f reset-clean >/dev/null 2>&1
 
   assert_file_not_exists "$wt_path/untracked.txt" "removes untracked files"
 }
@@ -103,8 +88,6 @@ test_reset_refuses_when_dirty() {
   __fixture_create_worktree "reset-dirty"
 
   local wt_path="$WT_DIR/origin/reset-dirty"
-
-  # Make worktree dirty
   __fixture_make_dirty "$wt_path"
 
   __capture wt reset reset-dirty
@@ -120,11 +103,8 @@ test_reset_force_flag_resets_dirty() {
   __fixture_create_worktree "reset-force"
 
   local wt_path="$WT_DIR/origin/reset-force"
-
-  # Make worktree dirty
   __fixture_make_dirty "$wt_path"
 
-  # Force reset should work
   __capture wt reset -f reset-force
   assert_exit_code 0 "returns 0 with -f flag"
 }
@@ -137,11 +117,8 @@ test_reset_force_flag_long() {
   __fixture_create_worktree "reset-force-long"
 
   local wt_path="$WT_DIR/origin/reset-force-long"
-
-  # Make worktree dirty
   __fixture_make_dirty "$wt_path"
 
-  # --force should also work
   __capture wt reset --force reset-force-long
   assert_exit_code 0 "returns 0 with --force flag"
 }
@@ -159,13 +136,15 @@ test_reset_to_custom_ref() {
 
   # Get the first commit hash
   local wt_path="$WT_DIR/origin/reset-custom"
-  local first_commit=$(git -C "$wt_path" rev-parse HEAD~1)
+  local first_commit
+  first_commit=$(git -C "$wt_path" rev-parse HEAD~1)
 
   # Reset to first commit
-  wt reset reset-custom "$first_commit" &>/dev/null
+  wt reset reset-custom "$first_commit" >/dev/null 2>&1
 
   # Check that HEAD is at first commit
-  local current_head=$(git -C "$wt_path" rev-parse HEAD)
+  local current_head
+  current_head=$(git -C "$wt_path" rev-parse HEAD)
   assert_eq "$current_head" "$first_commit" "resets to specified ref"
 }
 

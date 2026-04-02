@@ -1,12 +1,10 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 # Tests for wt status
 
 describe "wt status"
 
 setup() {
-  __fixture_unload_plugin
-  source "$PLUGIN_FILE"
   __fixture_create_repo
 }
 
@@ -46,13 +44,12 @@ it "shows clean status for clean worktree" test_status_shows_clean_worktree
 test_status_shows_dirty_worktree() {
   cd "$TEST_REPO"
   __fixture_create_branch "dirty-status"
-  wt add dirty-status &>/dev/null
+  wt add dirty-status >/dev/null 2>&1
   local wt_path="$WT_DIR/origin/dirty-status"
   __fixture_make_dirty "$wt_path"
   __capture wt status
   assert_contains "$__STDOUT" "dirty-status" "shows branch name"
   assert_contains "$__STDOUT" "dirty.txt" "shows uncommitted file"
-  # Check that the dirty-status section shows ?? dirty.txt, not "clean"
   assert_match "$__STDOUT" "dirty-status.*dirty\.txt" "dirty worktree shows file changes not 'clean'"
 }
 
@@ -62,8 +59,8 @@ test_status_shows_multiple_worktrees() {
   cd "$TEST_REPO"
   __fixture_create_branch "status1"
   __fixture_create_branch "status2"
-  wt add status1 &>/dev/null
-  wt add status2 &>/dev/null
+  wt add status1 >/dev/null 2>&1
+  wt add status2 >/dev/null 2>&1
   __capture wt status
   assert_contains "$__STDOUT" "status1" "shows first worktree"
   assert_contains "$__STDOUT" "status2" "shows second worktree"
@@ -77,9 +74,9 @@ it "shows all worktrees" test_status_shows_multiple_worktrees
 test_status_shows_file_details() {
   cd "$TEST_REPO"
   __fixture_create_branch "detailed"
-  wt add detailed &>/dev/null
+  wt add detailed >/dev/null 2>&1
   local wt_path="$WT_DIR/origin/detailed"
-  print "new file" > "$wt_path/newfile.txt"
+  printf 'new file\n' > "$wt_path/newfile.txt"
   __capture wt status
   # git status --short shows ?? for untracked files
   assert_match "$__STDOUT" "\?\?.*newfile.txt" "shows untracked file with ?? prefix"

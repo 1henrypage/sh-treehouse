@@ -14,13 +14,10 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
-      - name: Install zsh
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y zsh
       - name: Configure git
         run: |
           git config --global init.defaultBranch main
           git config --global user.email "ci@example.com"
           git config --global user.name "CI Bot"
       - name: Run tests
-        run: zsh tests/run_all.zsh
+        run: bash tests/run_all.sh
