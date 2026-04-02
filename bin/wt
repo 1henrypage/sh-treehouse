@@ -17,7 +17,7 @@ export WT_DIR
 
 # Dispatcher
 subcmd="${1:-help}"
-shift 2>/dev/null || true
+[ $# -gt 0 ] && shift
 
 case "$subcmd" in
   init)
