@@ -26,8 +26,9 @@ __wt_init_zsh() {
   # Stderr (errors) flows through directly without capture.
   cat <<'EOF'
 wt() {
-  local _wt_line _wt_out _wt_cd="" _wt_ec
-  _wt_out="$(__WT_EVAL_MODE=1 command wt "$@")"
+  local _wt_line _wt_out _wt_cd="" _wt_ec _wt_color=""
+  [ -t 1 ] && _wt_color=1
+  _wt_out="$(__WT_EVAL_MODE=1 __WT_COLOR=$_wt_color command wt "$@")"
   _wt_ec=$?
   while IFS= read -r _wt_line; do
     case "$_wt_line" in
@@ -45,8 +46,9 @@ EOF
 __wt_init_bash() {
   cat <<'EOF'
 wt() {
-  local _wt_line _wt_out _wt_cd="" _wt_ec
-  _wt_out="$(__WT_EVAL_MODE=1 command wt "$@")"
+  local _wt_line _wt_out _wt_cd="" _wt_ec _wt_color=""
+  [ -t 1 ] && _wt_color=1
+  _wt_out="$(__WT_EVAL_MODE=1 __WT_COLOR=$_wt_color command wt "$@")"
   _wt_ec=$?
   while IFS= read -r _wt_line; do
     case "$_wt_line" in
