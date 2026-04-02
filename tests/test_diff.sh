@@ -1,12 +1,10 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 # Tests for wt diff
 
 describe "wt diff"
 
 setup() {
-  __fixture_unload_plugin
-  source "$PLUGIN_FILE"
   __fixture_create_repo
 }
 
@@ -62,10 +60,8 @@ it "shows diff output for changes" test_diff_shows_changes
 
 test_diff_no_output_when_no_changes() {
   cd "$TEST_REPO"
-  # Create worktree from main without making changes
-  wt add diff-no-changes &>/dev/null
+  wt add diff-no-changes >/dev/null 2>&1
 
-  # No commits made since branching from main, so no diff
   __capture wt diff diff-no-changes
   assert_exit_code 0 "returns 0"
   assert_eq "$__STDOUT" "" "shows no output when no changes"
@@ -97,9 +93,9 @@ test_diff_uses_triple_dot_syntax() {
 
   # Make a commit in main
   cd "$TEST_REPO"
-  print "main-change" > main-file.txt
+  printf 'main-change\n' > main-file.txt
   git add main-file.txt
-  git commit -m "Main change" &>/dev/null
+  git commit -m "Main change" >/dev/null 2>&1
 
   # Make a commit in worktree
   __fixture_commit_in_worktree "diff-triple-dot" "worktree-file.txt" "Worktree change"

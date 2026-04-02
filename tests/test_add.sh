@@ -1,12 +1,10 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 # Tests for wt add
 
 describe "wt add"
 
 setup() {
-  __fixture_unload_plugin
-  source "$PLUGIN_FILE"
   __fixture_create_repo
 }
 
@@ -38,7 +36,7 @@ it "shows error outside git repository" test_add_outside_repo_shows_error
 
 test_add_creates_worktree_simple() {
   cd "$TEST_REPO"
-  wt add test-branch &>/dev/null
+  wt add test-branch >/dev/null 2>&1
   local expected="$WT_DIR/origin/test-branch"
   assert_dir_exists "$expected" "creates worktree directory"
 }
@@ -47,8 +45,7 @@ it "creates worktree for new branch" test_add_creates_worktree_simple
 
 test_add_auto_checkouts_to_worktree() {
   cd "$TEST_REPO"
-  local orig_pwd="$PWD"
-  wt add test-auto-checkout &>/dev/null
+  wt add test-auto-checkout >/dev/null 2>&1
   local expected="$WT_DIR/origin/test-auto-checkout"
   assert_eq "$PWD" "$expected" "automatically checks out to new worktree"
 }
@@ -69,14 +66,15 @@ it "creates worktree for existing local branch" test_add_creates_worktree_for_ex
 test_add_creates_worktree_for_remote_only_branch() {
   cd "$TEST_REPO"
   __fixture_create_remote_branch "remote-only"
-  git fetch origin &>/dev/null
+  git fetch origin >/dev/null 2>&1
   __capture wt add remote-only
   assert_exit_code 0 "returns 0"
   local expected="$WT_DIR/origin/remote-only"
   assert_dir_exists "$expected" "creates worktree directory"
   # Check that it's tracking the remote
   cd "$expected"
-  local upstream=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+  local upstream
+  upstream=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
   assert_contains "$upstream" "origin/remote-only" "sets up remote tracking"
 }
 
@@ -94,7 +92,8 @@ it "handles branch with slashes" test_add_with_slash_branch
 
 test_add_already_exists_shows_error() {
   cd "$TEST_REPO"
-  wt add test-branch &>/dev/null
+  wt add test-branch >/dev/null 2>&1
+  cd "$TEST_REPO"
   __capture wt add test-branch
   assert_exit_code 1 "returns 1"
   assert_contains "$__STDERR" "worktree already exists" "shows error"
@@ -120,7 +119,7 @@ it "creates nested directory structure" test_add_creates_nested_directories
 
 test_add_worktree_has_git_dir() {
   cd "$TEST_REPO"
-  wt add test-content &>/dev/null
+  wt add test-content >/dev/null 2>&1
   local wt_path="$WT_DIR/origin/test-content"
   # In linked worktrees, .git is a file pointing to main repo
   assert_file_exists "$wt_path/.git" "worktree has .git file"

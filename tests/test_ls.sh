@@ -1,12 +1,10 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 # Tests for wt ls
 
 describe "wt ls"
 
 setup() {
-  __fixture_unload_plugin
-  source "$PLUGIN_FILE"
   __fixture_create_repo
 }
 
@@ -38,7 +36,7 @@ it "lists main worktree" test_ls_shows_main_worktree
 test_ls_shows_added_worktree() {
   cd "$TEST_REPO"
   __fixture_create_branch "test-ls"
-  wt add test-ls &>/dev/null
+  wt add test-ls >/dev/null 2>&1
   __capture wt ls
   assert_contains "$__STDOUT" "test-ls" "lists added worktree"
   local expected="$WT_DIR/origin/test-ls"
@@ -51,8 +49,8 @@ test_ls_shows_multiple_worktrees() {
   cd "$TEST_REPO"
   __fixture_create_branch "wt1"
   __fixture_create_branch "wt2"
-  wt add wt1 &>/dev/null
-  wt add wt2 &>/dev/null
+  wt add wt1 >/dev/null 2>&1
+  wt add wt2 >/dev/null 2>&1
   __capture wt ls
   assert_contains "$__STDOUT" "wt1" "lists first worktree"
   assert_contains "$__STDOUT" "wt2" "lists second worktree"
@@ -74,7 +72,7 @@ it "shows clean indicator for clean worktree" test_ls_shows_clean_indicator
 test_ls_shows_dirty_indicator() {
   cd "$TEST_REPO"
   __fixture_create_branch "dirty-wt"
-  wt add dirty-wt &>/dev/null
+  wt add dirty-wt >/dev/null 2>&1
   local wt_path="$WT_DIR/origin/dirty-wt"
   __fixture_make_dirty "$wt_path"
   __capture wt ls
@@ -89,8 +87,8 @@ it "shows dirty indicator for dirty worktree" test_ls_shows_dirty_indicator
 test_ls_shows_locked_indicator() {
   cd "$TEST_REPO"
   __fixture_create_branch "locked-wt"
-  wt add locked-wt &>/dev/null
-  wt lock locked-wt &>/dev/null
+  wt add locked-wt >/dev/null 2>&1
+  wt lock locked-wt >/dev/null 2>&1
   __capture wt ls
   assert_contains "$__STDOUT" "[locked]" "shows locked indicator"
 }

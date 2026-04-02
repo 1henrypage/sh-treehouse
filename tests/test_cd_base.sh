@@ -1,14 +1,12 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 # Tests for wt checkout and wt base
-# Note: These tests call wt checkout/base directly (not via __capture)
-# since cd must affect the real shell's PWD
+# Note: cd-capable commands are called directly (not via __capture)
+# since cd must affect the real shell's PWD via the eval'd wt() wrapper
 
 describe "wt checkout and wt base"
 
 setup() {
-  __fixture_unload_plugin
-  source "$PLUGIN_FILE"
   __fixture_create_repo
 }
 
@@ -39,9 +37,8 @@ it "checkout: shows error for nonexistent branch" test_checkout_nonexistent_bran
 test_checkout_changes_directory() {
   cd "$TEST_REPO"
   __fixture_create_branch "test-checkout"
-  # Use base wt add without auto-checkout to test checkout separately
-  git worktree add "$WT_DIR/origin/test-checkout" test-checkout &>/dev/null
-  wt checkout test-checkout &>/dev/null
+  git worktree add "$WT_DIR/origin/test-checkout" test-checkout >/dev/null 2>&1
+  wt checkout test-checkout >/dev/null 2>&1
   local expected="$WT_DIR/origin/test-checkout"
   assert_eq "$PWD" "$expected" "changes to worktree directory"
 }
@@ -51,8 +48,8 @@ it "checkout: changes to worktree directory" test_checkout_changes_directory
 test_checkout_works_with_slash_branch() {
   cd "$TEST_REPO"
   __fixture_create_branch "feature/checkout-slash"
-  git worktree add "$WT_DIR/origin/feature--checkout-slash" feature/checkout-slash &>/dev/null
-  wt checkout feature/checkout-slash &>/dev/null
+  git worktree add "$WT_DIR/origin/feature--checkout-slash" feature/checkout-slash >/dev/null 2>&1
+  wt checkout feature/checkout-slash >/dev/null 2>&1
   local expected="$WT_DIR/origin/feature--checkout-slash"
   assert_eq "$PWD" "$expected" "changes to slash branch worktree"
 }
@@ -64,9 +61,9 @@ it "checkout: works with slash branch" test_checkout_works_with_slash_branch
 test_base_changes_to_main_root() {
   cd "$TEST_REPO"
   __fixture_create_branch "test-base"
-  wt add test-base &>/dev/null
-  # wt add now auto-checkouts, so we're already in the worktree
-  wt base &>/dev/null
+  wt add test-base >/dev/null 2>&1
+  # wt add auto-checkouts, so we're already in the worktree
+  wt base >/dev/null 2>&1
   assert_eq "$PWD" "$TEST_REPO" "returns to main repo"
 }
 
@@ -75,9 +72,9 @@ it "base: changes to main repository" test_base_changes_to_main_root
 test_base_works_from_linked_worktree() {
   cd "$TEST_REPO"
   __fixture_create_branch "test-base-linked"
-  wt add test-base-linked &>/dev/null
+  wt add test-base-linked >/dev/null 2>&1
   # wt add already changed to the worktree
-  wt base &>/dev/null
+  wt base >/dev/null 2>&1
   assert_eq "$PWD" "$TEST_REPO" "returns to main repo from linked worktree"
 }
 
@@ -99,11 +96,11 @@ test_checkout_then_base_returns_to_main() {
   local orig_pwd="$PWD"
   __fixture_create_branch "roundtrip-1"
   __fixture_create_branch "roundtrip-2"
-  git worktree add "$WT_DIR/origin/roundtrip-1" roundtrip-1 &>/dev/null
-  git worktree add "$WT_DIR/origin/roundtrip-2" roundtrip-2 &>/dev/null
-  wt checkout roundtrip-1 &>/dev/null
-  wt checkout roundtrip-2 &>/dev/null
-  wt base &>/dev/null
+  git worktree add "$WT_DIR/origin/roundtrip-1" roundtrip-1 >/dev/null 2>&1
+  git worktree add "$WT_DIR/origin/roundtrip-2" roundtrip-2 >/dev/null 2>&1
+  wt checkout roundtrip-1 >/dev/null 2>&1
+  wt checkout roundtrip-2 >/dev/null 2>&1
+  wt base >/dev/null 2>&1
   assert_eq "$PWD" "$orig_pwd" "round-trip checkout+base returns to original"
 }
 

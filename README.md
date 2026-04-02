@@ -1,36 +1,46 @@
-# zsh-treehouse
+# sh-treehouse
 
 <p align="center"><img src="assets/banner.png" width="600" alt="treehouse banner"></p>
 
-A zsh plugin that makes git worktrees easy to use. Stop stashing — start using worktrees.
+A shell plugin that makes git worktrees easy to use. Supports bash and zsh. Stop stashing — start using worktrees.
 
 ## Installation
 
-### Antigen
+### Zsh — Antigen
 
-```zsh
-antigen bundle 1henrypage/zsh-treehouse --branch=main
+```sh
+antigen bundle 1henrypage/sh-treehouse --branch=main
 ```
 
-### Manual
+### Zsh — Manual
 
 Clone the repo and source it in your `.zshrc`:
 
-```zsh
-source /path/to/zsh-treehouse/zsh-treehouse.plugin.zsh
+```sh
+source /path/to/sh-treehouse/sh-treehouse.plugin.zsh
 ```
 
 > **Note:** The source line must come **before** `compinit` for tab completion to work.
+
+### Bash
+
+Add to your `.bashrc`:
+
+```sh
+export PATH="/path/to/sh-treehouse/bin:$PATH"
+eval "$(wt init bash)"
+```
 
 ## Configuration
 
 | Variable | Default | Description |
 |---|---|---|
 | `WT_DIR` | `~/.treehouse` | Base directory where worktrees are stored |
+| `NO_COLOR` | unset | Set to any value to disable colored output |
 
-Set it in your `.zshrc` before sourcing the plugin:
+Set in your rc file before sourcing the plugin:
 
-```zsh
+```sh
 export WT_DIR="$HOME/.treehouse"
 ```
 
@@ -53,7 +63,7 @@ Branch names with slashes are flattened using `--` as a separator:
 | Command | Description |
 |---|---|
 | `wt add <branch>` | Create and checkout a worktree for a branch |
-| `wt rm [-f] <branch>` | Remove a worktree (prompts to delete branch) |
+| `wt rm [-f] [-y] <branch>` | Remove a worktree (prompts to delete branch; `-y` skips prompt) |
 | `wt ls` | List all worktrees with status |
 | `wt checkout <branch>` | Change directory to a worktree |
 | `wt base` | Change directory back to the main repo |
@@ -71,17 +81,18 @@ Branch names with slashes are flattened using `--` as a separator:
 | `wt integrate <branch>` | Rebase worktree onto main and fast-forward merge |
 | `wt diff <branch>` | Show diff of branch changes vs main |
 
-### Help
+### Setup
 
 | Command | Description |
 |---|---|
+| `wt init <shell>` | Print shell integration code for eval (zsh or bash) |
 | `wt help` | Show help |
 
 ## Examples
 
 ### Basic Usage
 
-```zsh
+```sh
 # Create a worktree for a hotfix (automatically checks out to it)
 wt add hotfix/payment-bug
 
@@ -102,13 +113,16 @@ wt status
 
 # Remove when done (will ask about deleting the branch too)
 wt rm hotfix/payment-bug
+
+# Remove without prompting for branch deletion
+wt rm -y hotfix/payment-bug
 ```
 
 ### Multi-Agent Workflow
 
 Use worktrees to isolate work from multiple AI agents or parallel tasks:
 
-```zsh
+```sh
 # Agent 1: Create worktree and make changes
 wt add agent-feature-a
 wt run agent-feature-a "make changes && git commit -am 'Add feature A'"
@@ -136,7 +150,7 @@ wt reset -f agent-feature-b
 
 ## Tab Completion
 
-Full zsh completion is included. Press `<TAB>` after any subcommand:
+Full zsh completion is included (zsh only). Press `<TAB>` after any subcommand:
 
 - `wt <TAB>` — shows all subcommands
 - `wt add <TAB>` — shows available branches (excludes already checked-out)
