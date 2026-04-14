@@ -99,11 +99,11 @@ _wt_commands() {
 (( $+functions[__wt_comp_worktree_branches] )) ||
 __wt_comp_worktree_branches() {
   local -a branches=()
-  local wt_path="" branch=""
-  while IFS= read -r line; do
-    case "$line" in
-      worktree\ *) wt_path="${line#worktree }" ;;
-      branch\ *) branch="${line#branch refs/heads/}" ;;
+  local _wt_line wt_path="" branch=""
+  while IFS= read -r _wt_line; do
+    case "$_wt_line" in
+      worktree\ *) wt_path="${_wt_line#worktree }" ;;
+      branch\ *) branch="${_wt_line#branch refs/heads/}" ;;
       "")
         [[ -n "$branch" ]] && branches+=("$branch")
         wt_path=""; branch=""
@@ -119,11 +119,12 @@ __wt_comp_worktree_branches() {
 (( $+functions[__wt_comp_branches_for_add] )) ||
 __wt_comp_branches_for_add() {
   local -a checked_out=() all_branches=() remote_branches=() available=()
+  local _wt_line
 
   # Get branches already in worktrees
-  while IFS= read -r line; do
-    case "$line" in
-      branch\ *) checked_out+=("${line#branch refs/heads/}") ;;
+  while IFS= read -r _wt_line; do
+    case "$_wt_line" in
+      branch\ *) checked_out+=("${_wt_line#branch refs/heads/}") ;;
     esac
   done < <(git worktree list --porcelain 2>/dev/null)
 
@@ -134,6 +135,7 @@ __wt_comp_branches_for_add() {
   local -a raw_remote=()
   raw_remote=(${(f)"$(git for-each-ref --format='%(refname:short)' refs/remotes/ 2>/dev/null)"})
   for rb in "${raw_remote[@]}"; do
+    [[ "$rb" != */* ]] && continue        # skip HEAD symrefs (e.g. origin/HEAD -> "origin")
     local stripped="${rb#*/}"
     [[ "$stripped" = "HEAD" ]] && continue
     remote_branches+=("$stripped")
@@ -149,11 +151,11 @@ __wt_comp_branches_for_add() {
 (( $+functions[__wt_comp_unlocked_branches] )) ||
 __wt_comp_unlocked_branches() {
   local -a branches=()
-  local wt_path="" branch="" is_locked=0
-  while IFS= read -r line; do
-    case "$line" in
-      worktree\ *) wt_path="${line#worktree }" ;;
-      branch\ *) branch="${line#branch refs/heads/}" ;;
+  local _wt_line wt_path="" branch="" is_locked=0
+  while IFS= read -r _wt_line; do
+    case "$_wt_line" in
+      worktree\ *) wt_path="${_wt_line#worktree }" ;;
+      branch\ *) branch="${_wt_line#branch refs/heads/}" ;;
       locked*) is_locked=1 ;;
       "")
         if [[ -n "$branch" ]] && (( ! is_locked )); then
@@ -174,11 +176,11 @@ __wt_comp_unlocked_branches() {
 (( $+functions[__wt_comp_locked_branches] )) ||
 __wt_comp_locked_branches() {
   local -a branches=()
-  local wt_path="" branch="" is_locked=0
-  while IFS= read -r line; do
-    case "$line" in
-      worktree\ *) wt_path="${line#worktree }" ;;
-      branch\ *) branch="${line#branch refs/heads/}" ;;
+  local _wt_line wt_path="" branch="" is_locked=0
+  while IFS= read -r _wt_line; do
+    case "$_wt_line" in
+      worktree\ *) wt_path="${_wt_line#worktree }" ;;
+      branch\ *) branch="${_wt_line#branch refs/heads/}" ;;
       locked*) is_locked=1 ;;
       "")
         if [[ -n "$branch" ]] && (( is_locked )); then
