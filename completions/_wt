@@ -47,24 +47,6 @@ _wt() {
             '(-)*::command:_normal' \
             && return 0
           ;;
-        (reset)
-          _arguments \
-            '-f[force reset]' \
-            '--force[force reset]' \
-            '1:branch:__wt_comp_worktree_branches' \
-            '2:ref:__wt_comp_refs' \
-            && return 0
-          ;;
-        (integrate)
-          _arguments \
-            '1:branch:__wt_comp_worktree_branches' \
-            && return 0
-          ;;
-        (diff)
-          _arguments \
-            '1:branch:__wt_comp_worktree_branches' \
-            && return 0
-          ;;
         (ls|base|prune|status|help)
           return 0
           ;;
@@ -87,9 +69,6 @@ _wt_commands() {
     'lock:Lock a worktree'
     'unlock:Unlock a worktree'
     'run:Run a command in a worktree'
-    'reset:Hard-reset a worktree to a ref'
-    'integrate:Rebase and fast-forward merge into default branch'
-    'diff:Show diff vs default branch'
     'help:Show help'
   )
   _describe -t commands 'wt commands' commands "$@"
@@ -195,17 +174,6 @@ __wt_comp_locked_branches() {
     branches+=("$branch")
   fi
   _describe -t branches 'locked worktrees' branches "$@"
-}
-
-# Complete git refs (branches and tags) for reset command
-(( $+functions[__wt_comp_refs] )) ||
-__wt_comp_refs() {
-  local -a refs=()
-  # Get all local branches
-  refs+=(${(f)"$(git for-each-ref --format='%(refname:short)' refs/heads/ 2>/dev/null)"})
-  # Get all tags
-  refs+=(${(f)"$(git for-each-ref --format='%(refname:short)' refs/tags/ 2>/dev/null)"})
-  _describe -t refs 'git refs' refs "$@"
 }
 
 if [[ "$funcstack[1]" = "_wt" ]]; then

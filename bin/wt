@@ -34,9 +34,6 @@ case "$subcmd" in
   lock)      __wt_cmd_lock "$@" ;;
   unlock)    __wt_cmd_unlock "$@" ;;
   run)       __wt_cmd_run "$@" ;;
-  reset)     __wt_cmd_reset "$@" ;;
-  integrate) __wt_cmd_integrate "$@" ;;
-  diff)      __wt_cmd_diff "$@" ;;
   help|-h|--help) __wt_cmd_help ;;
   *)
     __wt_err "unknown command: $subcmd"

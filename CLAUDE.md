@@ -91,8 +91,6 @@ Error cases to verify:
 - `wt ls` outside a git repo — should print "not inside a git repository"
 - `wt checkout nonexistent` — should print "no worktree found"
 - `wt add` with no args — should print usage
-- `wt integrate` with uncommitted changes — should refuse
-- `wt reset` with dirty worktree — should refuse unless `-f` flag used
 
 ## Configuration
 

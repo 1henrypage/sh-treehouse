@@ -258,116 +258,6 @@ __wt_cmd_run() {
   (cd "$wt_path" && eval "$@")
 }
 
-__wt_cmd_reset() {
-  local force=0 branch="" ref=""
-
-  while [ $# -gt 0 ]; do
-    case "$1" in
-      -f|--force) force=1; shift ;;
-      *)
-        if [ -z "$branch" ]; then
-          branch="$1"
-        else
-          ref="$1"
-        fi
-        shift
-        ;;
-    esac
-  done
-
-  [ -z "$branch" ] && { __wt_err "usage: wt reset [-f|--force] <branch> [<ref>]"; return 1; }
-  __wt_ensure_git_repo || return 1
-
-  local wt_path
-  wt_path="$(__wt_resolve_worktree_path "$branch")"
-  [ -z "$wt_path" ] && { __wt_err "no worktree found for branch '$branch'"; return 1; }
-
-  # Check if worktree is dirty
-  if [ "$force" != 1 ] && __wt_is_dirty "$wt_path"; then
-    __wt_err "worktree has uncommitted changes (use -f to force)"
-    return 1
-  fi
-
-  # Default to the default branch if no ref specified
-  if [ -z "$ref" ]; then
-    ref="$(__wt_default_branch)"
-  fi
-
-  # Hard reset and clean
-  git -C "$wt_path" reset --hard "$ref" >/dev/null 2>&1 || {
-    __wt_err "failed to reset to '$ref'"
-    return 1
-  }
-  git -C "$wt_path" clean -fd >/dev/null 2>&1
-
-  __wt_success "reset '$branch' to '$ref'"
-}
-
-__wt_cmd_integrate() {
-  local branch="${1:-}"
-  [ -z "$branch" ] && { __wt_err "usage: wt integrate <branch>"; return 1; }
-  __wt_ensure_git_repo || return 1
-
-  local wt_path
-  wt_path="$(__wt_resolve_worktree_path "$branch")"
-  [ -z "$wt_path" ] && { __wt_err "no worktree found for branch '$branch'"; return 1; }
-
-  # Check if worktree is clean
-  if __wt_is_dirty "$wt_path"; then
-    __wt_err "worktree has uncommitted changes"
-    return 1
-  fi
-
-  # Get main worktree root and default branch
-  local main_root default_branch
-  main_root="$(__wt_main_root)"
-  default_branch="$(__wt_default_branch)"
-
-  # Check if main worktree is clean
-  if __wt_is_dirty "$main_root"; then
-    __wt_err "main worktree has uncommitted changes"
-    return 1
-  fi
-
-  # Check if main worktree is on the default branch
-  local current_branch
-  current_branch="$(git -C "$main_root" symbolic-ref --short HEAD 2>/dev/null)"
-  if [ "$current_branch" != "$default_branch" ]; then
-    __wt_err "main worktree must be on '$default_branch' (currently on '$current_branch')"
-    return 1
-  fi
-
-  # Rebase worktree branch onto default branch
-  if ! git -C "$wt_path" rebase "$default_branch" >/dev/null 2>&1; then
-    __wt_err "rebase failed — resolve conflicts in:"
-    printf '  %s%s%s\n' "$__WT_CYAN" "$wt_path" "$__WT_RESET"
-    printf 'Then run: git -C "%s" rebase --continue\n' "$wt_path"
-    return 1
-  fi
-
-  # Fast-forward merge into main
-  if ! git -C "$main_root" merge --ff-only "$branch" >/dev/null 2>&1; then
-    __wt_err "fast-forward merge failed (non-linear history?)"
-    return 1
-  fi
-
-  __wt_success "integrated '$branch' into '$default_branch'"
-}
-
-__wt_cmd_diff() {
-  local branch="${1:-}"
-  [ -z "$branch" ] && { __wt_err "usage: wt diff <branch>"; return 1; }
-  __wt_ensure_git_repo || return 1
-
-  local wt_path
-  wt_path="$(__wt_resolve_worktree_path "$branch")"
-  [ -z "$wt_path" ] && { __wt_err "no worktree found for branch '$branch'"; return 1; }
-
-  local default_branch
-  default_branch="$(__wt_default_branch)"
-  git -C "$wt_path" diff "${default_branch}...${branch}"
-}
-
 __wt_cmd_help() {
   printf '%swt%s - git worktree manager\n\n' "$__WT_BOLD" "$__WT_RESET"
   printf 'Usage: wt <command> [args]\n\n'
@@ -382,10 +272,6 @@ __wt_cmd_help() {
   printf '  lock <branch>         Lock a worktree\n'
   printf '  unlock <branch>       Unlock a worktree\n'
   printf '  run <branch> <cmd>    Run a command in a worktree\n'
-  printf '  reset [-f] <branch> [<ref>]\n'
-  printf '                        Hard-reset a worktree to a ref (default: default branch)\n'
-  printf '  integrate <branch>    Rebase onto default branch and fast-forward merge\n'
-  printf '  diff <branch>         Show diff of branch changes vs default branch\n'
   printf '  init <shell>          Output shell integration code (eval this in your rc file)\n'
   printf '  help                  Show this help\n'
   printf '\n'
