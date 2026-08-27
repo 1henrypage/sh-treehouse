@@ -71,22 +71,6 @@ __fixture_make_dirty() {
   printf 'uncommitted\n' > "$wt_path/dirty.txt"
 }
 
-# Create a commit in a worktree
-__fixture_commit_in_worktree() {
-  local branch="$1"
-  local filename="$2"
-  local message="$3"
-  local wt_path
-  # Compute path using the same logic as __wt_branch_to_path
-  local safe_branch
-  safe_branch="$(printf '%s' "$branch" | sed 's|/|--|g')"
-  wt_path="$WT_DIR/origin/$safe_branch"
-
-  printf 'content-%s\n' "$filename" > "$wt_path/$filename"
-  git -C "$wt_path" add "$filename"
-  git -C "$wt_path" commit -m "$message" >/dev/null 2>&1
-}
-
 # ── Fixture Teardown ──────────────────────────────────────────────────
 
 __fixture_teardown() {

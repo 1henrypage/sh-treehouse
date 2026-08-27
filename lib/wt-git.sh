@@ -91,23 +91,6 @@ __wt_is_dirty() {
   [ -n "$(git -C "$wt_path" status --porcelain 2>/dev/null)" ]
 }
 
-# Detect the repository's default branch
-# Checks for main, then master, then falls back to the main worktree's HEAD
-__wt_default_branch() {
-  if git show-ref --verify --quiet refs/heads/main 2>/dev/null; then
-    printf 'main\n'
-    return
-  fi
-  if git show-ref --verify --quiet refs/heads/master 2>/dev/null; then
-    printf 'master\n'
-    return
-  fi
-  # Fallback: get the branch checked out in the main worktree
-  local main_root
-  main_root="$(__wt_main_root)"
-  git -C "$main_root" symbolic-ref --short HEAD 2>/dev/null
-}
-
 # Signal a cd to the shell wrapper, or print a hint when running standalone
 __wt_do_cd() {
   local target="$1"

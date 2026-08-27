@@ -73,14 +73,6 @@ Branch names with slashes are flattened using `--` as a separator:
 | `wt unlock <branch>` | Unlock a locked worktree |
 | `wt run <branch> <cmd>` | Run a command inside a worktree |
 
-### Agent Workflow
-
-| Command | Description |
-|---|---|
-| `wt reset [-f] <branch> [<ref>]` | Hard-reset a worktree to a ref (default: main/master) |
-| `wt integrate <branch>` | Rebase worktree onto main and fast-forward merge |
-| `wt diff <branch>` | Show diff of branch changes vs main |
-
 ### Setup
 
 | Command | Description |
@@ -130,22 +122,6 @@ wt run agent-feature-a "make changes && git commit -am 'Add feature A'"
 # Agent 2: Create another worktree
 wt add agent-feature-b
 wt run agent-feature-b "make changes && git commit -am 'Add feature B'"
-
-# Review what each agent did
-wt diff agent-feature-a
-wt diff agent-feature-b
-
-# Integrate agent A's work into main
-wt integrate agent-feature-a
-
-# Reset agent B to start over
-wt reset agent-feature-b
-
-# Or reset to a specific commit
-wt reset agent-feature-b HEAD~2
-
-# Force reset even with uncommitted changes
-wt reset -f agent-feature-b
 ```
 
 ## Tab Completion
@@ -155,9 +131,6 @@ Full zsh completion is included (zsh only). Press `<TAB>` after any subcommand:
 - `wt <TAB>` — shows all subcommands
 - `wt add <TAB>` — shows available branches (excludes already checked-out)
 - `wt checkout <TAB>` — shows existing worktree branches
-- `wt reset <TAB>` — shows worktree branches, then refs
-- `wt integrate <TAB>` — shows worktree branches
-- `wt diff <TAB>` — shows worktree branches
 - `wt lock <TAB>` — shows only unlocked worktrees
 - `wt unlock <TAB>` — shows only locked worktrees
 
