@@ -125,6 +125,34 @@ test_rm_force_removes_dirty_worktree() {
 
 it "force flag removes dirty worktree" test_rm_force_removes_dirty_worktree
 
+# ── Yes Flag ─────────────────────────────────────────────────────────────
+
+test_rm_yes_force_deletes_unmerged_branch() {
+  cd "$TEST_REPO"
+  __fixture_create_branch "rm-yes-force"
+  wt add rm-yes-force >/dev/null 2>&1
+  cd "$TEST_REPO"
+  wt rm -f -y rm-yes-force < /dev/null >/dev/null 2>&1
+  git show-ref --verify --quiet refs/heads/rm-yes-force 2>/dev/null
+  local rc=$?
+  assert_eq "$rc" "1" "-y deletes an unmerged branch when combined with -f"
+}
+
+it "-y deletes an unmerged branch with -f" test_rm_yes_force_deletes_unmerged_branch
+
+test_rm_yes_deletes_merged_branch() {
+  cd "$TEST_REPO"
+  git branch rm-yes-merged
+  wt add rm-yes-merged >/dev/null 2>&1
+  cd "$TEST_REPO"
+  wt rm -y rm-yes-merged < /dev/null >/dev/null 2>&1
+  git show-ref --verify --quiet refs/heads/rm-yes-merged 2>/dev/null
+  local rc=$?
+  assert_eq "$rc" "1" "-y deletes a merged branch without -f"
+}
+
+it "-y deletes a merged branch without -f" test_rm_yes_deletes_merged_branch
+
 # ── Success Messages ──────────────────────────────────────────────────
 
 test_rm_shows_success_message() {

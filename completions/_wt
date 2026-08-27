@@ -23,6 +23,8 @@ _wt() {
           _arguments \
             '-f[force removal]' \
             '--force[force removal]' \
+            '-y[skip the branch deletion prompt and delete]' \
+            '--yes[skip the branch deletion prompt and delete]' \
             '1:branch:__wt_comp_worktree_branches' \
             && return 0
           ;;
@@ -47,6 +49,11 @@ _wt() {
             '(-)*::command:_normal' \
             && return 0
           ;;
+        (init)
+          _arguments \
+            '1:shell:(zsh bash)' \
+            && return 0
+          ;;
         (ls|base|prune|status|help)
           return 0
           ;;
@@ -69,6 +76,7 @@ _wt_commands() {
     'lock:Lock a worktree'
     'unlock:Unlock a worktree'
     'run:Run a command in a worktree'
+    'init:Output shell integration code for eval'
     'help:Show help'
   )
   _describe -t commands 'wt commands' commands "$@"
