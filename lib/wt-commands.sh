@@ -50,7 +50,7 @@ __wt_cmd_rm() {
     esac
   done
 
-  [ -z "$branch" ] && { __wt_err "usage: wt rm [-f|--force] <branch>"; return 1; }
+  [ -z "$branch" ] && { __wt_err "usage: wt rm [-f|--force] [-y|--yes] <branch>"; return 1; }
   __wt_ensure_git_repo || return 1
 
   local wt_path
@@ -262,18 +262,18 @@ __wt_cmd_help() {
   printf '%swt%s - git worktree manager\n\n' "$__WT_BOLD" "$__WT_RESET"
   printf 'Usage: wt <command> [args]\n\n'
   printf 'Commands:\n'
-  printf '  add <branch>          Create and checkout a worktree for a branch\n'
-  printf '  rm [-f] <branch>      Remove a worktree (optionally delete branch)\n'
-  printf '  ls                    List worktrees with status\n'
-  printf '  checkout <branch>     Change to a worktree directory\n'
-  printf '  base                  Change to the main repo directory\n'
-  printf '  prune                 Clean up stale worktree references\n'
-  printf '  status                Show git status across all worktrees\n'
-  printf '  lock <branch>         Lock a worktree\n'
-  printf '  unlock <branch>       Unlock a worktree\n'
-  printf '  run <branch> <cmd>    Run a command in a worktree\n'
-  printf '  init <shell>          Output shell integration code (eval this in your rc file)\n'
-  printf '  help                  Show this help\n'
+  printf '  %-24s%s\n' "add <branch>"          "Create and checkout a worktree for a branch"
+  printf '  %-24s%s\n' "rm [-f] [-y] <branch>" "Remove a worktree; -y also deletes the branch"
+  printf '  %-24s%s\n' "ls"                    "List worktrees with status"
+  printf '  %-24s%s\n' "checkout <branch>"     "Change to a worktree directory"
+  printf '  %-24s%s\n' "base"                  "Change to the main repo directory"
+  printf '  %-24s%s\n' "prune"                 "Clean up stale worktree references"
+  printf '  %-24s%s\n' "status"                "Show git status across all worktrees"
+  printf '  %-24s%s\n' "lock <branch>"         "Lock a worktree"
+  printf '  %-24s%s\n' "unlock <branch>"       "Unlock a worktree"
+  printf '  %-24s%s\n' "run <branch> <cmd>"    "Run a command in a worktree"
+  printf '  %-24s%s\n' "init <shell>"          "Output shell integration code (eval this in your rc file)"
+  printf '  %-24s%s\n' "help"                  "Show this help"
   printf '\n'
   printf 'Shell integration:\n'
   printf '  eval "$(wt init zsh)"   # Add to .zshrc\n'
